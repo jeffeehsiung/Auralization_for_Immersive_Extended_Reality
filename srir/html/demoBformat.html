@@ -1,0 +1,205 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>demoBformat</title><meta name="generator" content="MATLAB 8.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-11-02"><meta name="DC.source" content="demoBformat.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Example usage of SDM toolbox for analysis of B-format impulse responses.</a></li><li><a href="#2">Load the impulse response.</a></li><li><a href="#3">Read the data</a></li><li><a href="#4">Create SDM struct for analysis with a set of parameters</a></li><li><a href="#5">Calculate the SDM coefficients</a></li><li><a href="#6">Create a struct for visualization with a set of parameters</a></li><li><a href="#7">Draw analysis parameters and impulse responses</a></li><li><a href="#8">Draw  time frequency visualization</a></li><li><a href="#9">Draw the spatio temporal visualization for each section plane</a></li></ul></div><h2>Example usage of SDM toolbox for analysis of B-format impulse responses.<a name="1"></a></h2><p>The data is a measurement from a class room The documentation of the measurement is found at <a href="http://legacy.spa.aalto.fi/projects/poririrs/">http://legacy.spa.aalto.fi/projects/poririrs/</a></p><pre class="codeinput"><span class="comment">% SDM toolbox : demoBformat</span>
+<span class="comment">% Sakari Tervo &amp; Jukka Patynen, Aalto University, 2016</span>
+<span class="comment">% Sakari.Tervo@aalto.fi and Jukka.Patynen@aalto.fi</span>
+</pre><h2>Load the impulse response.<a name="2"></a></h2><pre class="codeinput"><span class="comment">% 4s long impulse response measured at 48 kHz</span>
+
+<span class="comment">% Download an B-format room impulse response from spa.aalto.fi</span>
+ir_filename = <span class="string">'sndfld.zip'</span>;
+<span class="keyword">if</span> ~exist([ir_filename],<span class="string">'file'</span>)
+    disp([<span class="string">'Downloading an example IR '</span> ir_filename <span class="string">' from the database.'</span>])
+    url_ir = [<span class="string">'http://legacy.spa.aalto.fi/projects/poririrs/wavs/sndfld.zip'</span>];
+    websave([ir_filename],url_ir);
+    unzip(ir_filename)
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Downloading an example IR sndfld.zip from the database.
+</pre><h2>Read the data<a name="3"></a></h2><p>Read impulse response</p><pre class="codeinput">[ir_bformat,fs] = audioread(<span class="string">'s1_r1_sf.wav'</span>);
+</pre><h2>Create SDM struct for analysis with a set of parameters<a name="4"></a></h2><p>Parameters required for the calculation Load default array and define some parameters with custom values fs = 48e3;</p><pre class="codeinput">a = createSDMStruct(<span class="string">'DefaultArray'</span>,<span class="string">'Bformat'</span>,<span class="string">'fs'</span>,fs,<span class="string">'winLen'</span>,15);
+</pre><pre class="codeoutput">User-defined SDM Settings are used :
+           fs: 48000
+            c: 345
+       winLen: 15
+    parFrames: 8192
+    showArray: 0
+      micLocs: [NaN NaN]
+
+</pre><h2>Calculate the SDM coefficients<a name="5"></a></h2><p>Solve the DOA of each time window assuming wide band reflections, white noise in the sensors and far-field (plane wave propagation model inside the array)</p><pre class="codeinput">DOA{1} = SDMbf(ir_bformat, a);
+
+<span class="comment">% Here we are using the pressure in the b-format as the estimate for the</span>
+<span class="comment">% pressure in the center of the array</span>
+P{1} = ir_bformat(:,1);
+</pre><pre class="codeoutput">Started SDM processing
+Ended SDM processing in 0.012492 seconds.
+</pre><h2>Create a struct for visualization with a set of parameters<a name="6"></a></h2><p>Load default setup for very small room and change some of the variables</p><pre class="codeinput">v = createVisualizationStruct(<span class="string">'DefaultRoom'</span>,<span class="string">'LargeRoom'</span>,<span class="keyword">...</span>
+    <span class="string">'name'</span>,<span class="string">'Pori, Concert Hall'</span>,<span class="string">'fs'</span>,fs,<span class="string">'t'</span>,[2 5 10 20 50 100 200 2000]);
+<span class="comment">% For visualization purposes, set the text interpreter to latex</span>
+set(0,<span class="string">'DefaultTextInterpreter'</span>,<span class="string">'latex'</span>)
+</pre><pre class="codeoutput">createVisualizationStruct : User-defined visualization settings are used :
+              fs: 48000
+           plane: 'lateral'
+             DOI: 'forward'
+       plotStyle: 'line'
+            name: 'Pori, Concert Hall'
+             res: 1
+               t: [2 5 10 20 50 100 200 2000]
+          colors: [8x3 double]
+       dBSpacing: 6
+      DOASpacing: 30
+      dBDynamics: 45
+       linewidth: [1 1 1 1 1 1 1 1]
+        showGrid: 1
+    smoothMethod: 'average'
+       smoothRes: 3
+
+</pre><h2>Draw analysis parameters and impulse responses<a name="7"></a></h2><pre class="codeinput">parameterVisualization(P, v);
+</pre><pre class="codeoutput">Started visualization of parameters.
+Ended visualization of parameters in 0.15251 seconds.
+</pre><img vspace="5" hspace="5" src="demoBformat_01.png" alt=""> <h2>Draw  time frequency visualization<a name="8"></a></h2><pre class="codeinput">timeFrequencyVisualization(P, v)
+</pre><pre class="codeoutput">Started time-frequency visualization.
+Ended time-frequency visualization in 135.5062 seconds.
+</pre><img vspace="5" hspace="5" src="demoBformat_02.png" alt=""> <h2>Draw the spatio temporal visualization for each section plane<a name="9"></a></h2><pre class="codeinput">v.plane = <span class="string">'lateral'</span>;
+spatioTemporalVisualization(P, DOA, v)
+v.plane = <span class="string">'transverse'</span>;
+spatioTemporalVisualization(P, DOA, v)
+v.plane = <span class="string">'median'</span>;
+spatioTemporalVisualization(P, DOA, v)
+
+<span class="comment">% &lt;----- EOF demoBFormat</span>
+</pre><pre class="codeoutput">Started spatio-temporal visualization.
+Ended spatio-temporal visualization in 0.41443 seconds.
+Started spatio-temporal visualization.
+Ended spatio-temporal visualization in 0.39618 seconds.
+Started spatio-temporal visualization.
+Ended spatio-temporal visualization in 0.39182 seconds.
+</pre><img vspace="5" hspace="5" src="demoBformat_03.png" alt=""> <img vspace="5" hspace="5" src="demoBformat_04.png" alt=""> <img vspace="5" hspace="5" src="demoBformat_05.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Example usage of SDM toolbox for analysis of B-format impulse responses. 
+% The data is a measurement from a class room
+% The documentation of the measurement is found at 
+% http://legacy.spa.aalto.fi/projects/poririrs/
+
+% SDM toolbox : demoBformat
+% Sakari Tervo & Jukka Patynen, Aalto University, 2016
+% Sakari.Tervo@aalto.fi and Jukka.Patynen@aalto.fi
+
+%% Load the impulse response. 
+
+% 4s long impulse response measured at 48 kHz
+
+% Download an B-format room impulse response from spa.aalto.fi
+ir_filename = 'sndfld.zip';
+if ~exist([ir_filename],'file')
+    disp(['Downloading an example IR ' ir_filename ' from the database.'])
+    url_ir = ['http://legacy.spa.aalto.fi/projects/poririrs/wavs/sndfld.zip'];
+    websave([ir_filename],url_ir);
+    unzip(ir_filename)
+end
+
+%% Read the data
+% Read impulse response
+[ir_bformat,fs] = audioread('s1_r1_sf.wav');
+
+%% Create SDM struct for analysis with a set of parameters
+% Parameters required for the calculation
+% Load default array and define some parameters with custom values
+% fs = 48e3;
+a = createSDMStruct('DefaultArray','Bformat','fs',fs,'winLen',15);
+
+%% Calculate the SDM coefficients
+% Solve the DOA of each time window assuming wide band reflections, white
+% noise in the sensors and far-field (plane wave propagation model inside the array)
+DOA{1} = SDMbf(ir_bformat, a);
+
+% Here we are using the pressure in the b-format as the estimate for the
+% pressure in the center of the array
+P{1} = ir_bformat(:,1);
+
+%% Create a struct for visualization with a set of parameters
+% Load default setup for very small room and change some of the variables
+v = createVisualizationStruct('DefaultRoom','LargeRoom',...
+    'name','Pori, Concert Hall','fs',fs,'t',[2 5 10 20 50 100 200 2000]);
+% For visualization purposes, set the text interpreter to latex
+set(0,'DefaultTextInterpreter','latex')
+
+%% Draw analysis parameters and impulse responses
+parameterVisualization(P, v);
+%% Draw  time frequency visualization
+timeFrequencyVisualization(P, v)
+%% Draw the spatio temporal visualization for each section plane
+v.plane = 'lateral';
+spatioTemporalVisualization(P, DOA, v)
+v.plane = 'transverse';
+spatioTemporalVisualization(P, DOA, v)
+v.plane = 'median';
+spatioTemporalVisualization(P, DOA, v)
+
+% <REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- EOF demoBFormat
+##### SOURCE END #####
+--></body></html>

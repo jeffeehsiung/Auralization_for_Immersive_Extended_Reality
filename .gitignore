@@ -1,0 +1,21 @@
+# ignore operating system generated files
+Thumbs.db
+```
+# ignore the node_modules folder
+node_modules
+```
+# ignore the build folder
+build
+```
+# ignore the .cache folder
+.cache
+```
+# ignore .vscode folder
+.vscode
+```
+# ignore the .idea folder
+.idea
+```
+# ignore the .DS_Store file at the root
+.DS_Store
+```
