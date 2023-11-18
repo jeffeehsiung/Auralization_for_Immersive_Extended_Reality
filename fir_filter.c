@@ -1,90 +1,68 @@
-
 #include <usbstk5515.h>
-#include <usbstk5515_i2c.h>
-#include <aic3204.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "filter.h"
+#include "bandpass.h"
 
-/** size of data type:
- * unsigned int in C has 2 bytes
- * short int in C has 2 bytes
- * char in C has 1 byte
- * long int in C has 4 bytes
- */
-//short x[BPL] = {0};
+// Direct-Form FIR Filter Implementation
+short FIR(Int16 x, Int16 * w) {
+    long y = 0;  // 32-bit word
+    short i;
 
-short FIR(unsigned int i) {
-    static short filter_state[BPL] = {0}; // Initialize filter state to zeros
-    long sum = 0;
-    unsigned int j;
+    // Step 1: Set w0 = x;
+    w[0] = x;
 
-    // Update filter state by shifting samples
-    for (j = BPL - 1; j > 0; j--) {
-        filter_state[j] = filter_state[j - 1];
+    // Step 2: Multiply accumulate filter taps and tapped delay line
+    for (i = 0; i < BPL; i++) {
+        y += BP[i] * (long) w[i];  // Q16.15 * Q16.15 = Q32.30
     }
 
-    // Place the new sample at the beginning of the filter state
-    filter_state[0] = (short)i;
-
-    // FIR Filter Code here...
-    for (j = 0; j < BPL; j++) {
-        sum += (long)BP[j] * filter_state[j];
+    // Step 3: Shift the delay line by one
+    for (i = BPL; i >= 1; i--) {
+        w[i] = w[i - 1];
     }
-
-    return (short)(sum >> 15); // Conversion: 32Q30 --> 16Q15.
-
-//    Uint16 j;
-//    long index;
-//    long sum = 0;
-//
-//    /** filter */
-//    for(j=0; j < BPL; j++){
-//        if(i>=j)
-//            index = i-j;
-//        else
-//            index = BPL + i -j;
-//        sum += (long)x[index] * (long)BP[j];
-//    }
-//
-//    sum = sum + 0x00004000; // round rather than truncate.
-//    return (short)(sum >> 15); // conversion: 32Q30 --> 16Q15.
+    
+    y += 0x00004000; // Round the part we'll be truncating (Carry bit of this sum will be the LSB after conversion)
+    return y >> 15;  // Conversion: Q32.30 --> Q16.15.
 }
+
 
 void main(void) {
 
     USBSTK5515_init();
-    aic3204_init();
 
     FILE *fpIn, *fpOut;
 
-    fpIn = fopen("..\\data\\input.pcm", "rb");    // Read
-    fpOut = fopen("..\\data\\output.pcm", "wb");    // Write
+    fpIn = fopen("..\\data\\input.pcm", "rb");  // Read operation. File pointer starts at beginning of file.
+    fpOut = fopen("..\\data\\output.pcm", "wb");  // Write operation. File pointer starts at beginning of file.
 
     if (fpIn == NULL) {
         printf("Can't open input file\n");
+        exit(0);
     }
-
-    if (fpOut == NULL) {
-        printf("Can't open output file\n");
-    }
-//    Uint16 i;
+    
     char temp[2];
+    Int16 input, output = 0;
+
+    Int16 w[BPL];       // Tapped delay line
+    memset(w, 0, BPL);  // Initialize with zeros
+
     while (fread(temp, sizeof(char), 2, fpIn) == 2) {
+        // Read 2 8-bit words.
+        input = temp[0] | (temp[1] << 8);
 
-        /** read a little-endian sample */
-        short input_sample = ((short)temp[1] << 8) | (temp[0]);
+        // Perform a filter operation
+        output = FIR(input, w);
 
-//        /** store the latest sample */
-//        if(i >= BPL) i = 0;
-//        x[i] = input_sample;
-//        /** apply the fir filter */
-//        short output_sample = FIR(i);
-        short output_sample = FIR((unsigned int)input_sample);
+        temp[0] = output & 0x00FF;
+        temp[1] = (output & 0xFF00) >> 8;
 
-        /** write the filtered sample to the output file */
-        fwrite(&output_sample, sizeof(short), 1, fpOut);
-//        i++;
+        // Write 2 8-bit words.
+        fwrite(temp, sizeof(char), 2, fpOut);
     }
-    printf("Filtering complete!");
+
+    fclose(fpOut);
+    fclose(fpIn);
+    printf("Filtering complete! \n");
 }
