@@ -19,3 +19,7 @@ build
 # ignore the .DS_Store file at the root
 .DS_Store
 ```
+
+# ignore the .wav files
+*.wav
+```
